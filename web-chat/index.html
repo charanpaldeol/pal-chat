@@ -38,16 +38,25 @@
     const messagesDiv = document.getElementById('messages');
     const input = document.getElementById('messageInput');
 
-    const socket = new WebSocket('wss://pal-chat.fly.dev');    // ← your live relay
+    const socket = new WebSocket('wss://pal-chat.fly.dev');
 
     socket.onopen = () => {
       console.log('✅ Connected to WebSocket relay');
     };
 
-    socket.onmessage = (event) => {
+    socket.onmessage = async (event) => {
+      let messageText;
+
+      // Handle Blob vs Text
+      if (event.data instanceof Blob) {
+        messageText = await event.data.text();
+      } else {
+        messageText = event.data;
+      }
+
       const msg = document.createElement('div');
       msg.className = "bg-gray-200 text-gray-800 px-4 py-2 rounded-xl self-start max-w-[75%]";
-      msg.textContent = event.data;
+      msg.textContent = `👤 Stranger: ${messageText}`;
       messagesDiv.appendChild(msg);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
     };
@@ -58,7 +67,7 @@
 
       const myMsg = document.createElement('div');
       myMsg.className = "bg-blue-100 text-blue-800 px-4 py-2 rounded-xl self-end max-w-[75%]";
-      myMsg.textContent = text;
+      myMsg.textContent = `🫵 You: ${text}`;
       messagesDiv.appendChild(myMsg);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
