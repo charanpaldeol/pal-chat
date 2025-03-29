@@ -1,11 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pal Chat (ਪਲ)</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+    <title>Pal Chat – Private & Secure Messaging</title>
+  
+    <meta name="description" content="Pal Chat is a secure, no-account, ephemeral chat app built for private conversations. No storage. No tracking. Just the moment." />
+    
+    <!-- Open Graph (for social sharing) -->
+    <meta property="og:title" content="Pal Chat – Private & Secure Messaging" />
+    <meta property="og:description" content="Talk securely without an account. Nothing stored, ever." />
+    <meta property="og:url" content="https://palchat.org" />
+    <meta property="og:type" content="website" />
+    <!-- Optional image -->
+    <!-- <meta property="og:image" content="https://palchat.org/og-image.png" /> -->
+  </head>
+  
 <body class="bg-gray-100 text-gray-900 flex items-center justify-center min-h-screen">
 
   <div class="w-full max-w-md p-4 bg-white rounded-2xl shadow-lg flex flex-col h-[90vh]">
@@ -38,7 +49,7 @@
     const messagesDiv = document.getElementById('messages');
     const input = document.getElementById('messageInput');
 
-    const socket = new WebSocket('wss://pal-chat.fly.dev');
+    const socket = new WebSocket('wss://relay.palchat.org');
 
     socket.onopen = () => {
       console.log('✅ Connected to WebSocket relay');
