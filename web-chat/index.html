@@ -38,7 +38,7 @@
     const messagesDiv = document.getElementById('messages');
     const input = document.getElementById('messageInput');
 
-    const socket = new WebSocket('wss://pal-chat-relay.fly.dev'); // ← your live relay
+    const socket = new WebSocket('wss://pal-chat.fly.dev');    // ← your live relay
 
     socket.onopen = () => {
       console.log('✅ Connected to WebSocket relay');
