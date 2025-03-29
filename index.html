@@ -1,10 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Hello Vercel</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pal Chat (ਪਲ)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <h1>Hello from Vercel! 👋</h1>
+<body class="bg-gray-100 text-gray-900 flex items-center justify-center min-h-screen">
+
+  <div class="w-full max-w-md p-4 bg-white rounded-2xl shadow-lg flex flex-col h-[90vh]">
+    <h1 class="text-xl font-bold text-center mb-4">Pal (ਪਲ) – Private Chat</h1>
+
+    <!-- Chat Messages -->
+    <div id="messages" class="flex-1 overflow-y-auto space-y-2 p-2 border rounded-md mb-4">
+      <!-- Messages will appear here -->
+    </div>
+
+    <!-- Input Area -->
+    <div class="flex gap-2">
+      <input
+        id="messageInput"
+        type="text"
+        placeholder="Type your message..."
+        class="flex-1 px-4 py-2 border rounded-xl focus:outline-none focus:ring focus:ring-blue-300"
+      />
+      <button
+        onclick="sendMessage()"
+        class="px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600"
+      >
+        Send
+      </button>
+    </div>
+  </div>
+
+  <!-- Simple JS for now -->
+  <script>
+    const messagesDiv = document.getElementById('messages');
+    const input = document.getElementById('messageInput');
+
+    function sendMessage() {
+      const text = input.value.trim();
+      if (!text) return;
+
+      const msg = document.createElement('div');
+      msg.className = "bg-blue-100 text-blue-800 px-4 py-2 rounded-xl self-end max-w-[75%]";
+      msg.textContent = text;
+
+      messagesDiv.appendChild(msg);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      input.value = "";
+    }
+
+    // Optional: Send on Enter
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+  </script>
 </body>
 </html>
