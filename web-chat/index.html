@@ -1,40 +1,74 @@
-<script>
-  const messagesDiv = document.getElementById('messages');
-  const input = document.getElementById('messageInput');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pal Chat (ਪਲ)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-900 flex items-center justify-center min-h-screen">
 
-  // ✅ Connect to your Fly.io WebSocket relay
-  const socket = new WebSocket('wss://pal-chat-relay.fly.dev');
+  <div class="w-full max-w-md p-4 bg-white rounded-2xl shadow-lg flex flex-col h-[90vh]">
+    <h1 class="text-xl font-bold text-center mb-4">Pal (ਪਲ) – Private Chat</h1>
 
-  socket.onopen = () => {
-    console.log('✅ Connected to WebSocket relay');
-  };
+    <!-- Chat Messages -->
+    <div id="messages" class="flex-1 overflow-y-auto space-y-2 p-2 border rounded-md mb-4">
+      <!-- Messages will appear here -->
+    </div>
 
-  socket.onmessage = (event) => {
-    const msg = document.createElement('div');
-    msg.className = "bg-gray-200 text-gray-800 px-4 py-2 rounded-xl self-start max-w-[75%]";
-    msg.textContent = event.data;
-    messagesDiv.appendChild(msg);
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-  };
+    <!-- Input Area -->
+    <div class="flex gap-2">
+      <input
+        id="messageInput"
+        type="text"
+        placeholder="Type your message..."
+        class="flex-1 px-4 py-2 border rounded-xl focus:outline-none focus:ring focus:ring-blue-300"
+      />
+      <button
+        onclick="sendMessage()"
+        class="px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600"
+      >
+        Send
+      </button>
+    </div>
+  </div>
 
-  function sendMessage() {
-    const text = input.value.trim();
-    if (!text) return;
+  <!-- WebSocket Chat Script -->
+  <script>
+    const messagesDiv = document.getElementById('messages');
+    const input = document.getElementById('messageInput');
 
-    // 💬 Show my message
-    const myMsg = document.createElement('div');
-    myMsg.className = "bg-blue-100 text-blue-800 px-4 py-2 rounded-xl self-end max-w-[75%]";
-    myMsg.textContent = text;
-    messagesDiv.appendChild(myMsg);
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    const socket = new WebSocket('wss://pal-chat-relay.fly.dev'); // ← your live relay
 
-    // 🚀 Send to server
-    socket.send(text);
-    input.value = "";
-  }
+    socket.onopen = () => {
+      console.log('✅ Connected to WebSocket relay');
+    };
 
-  // ⌨️ Send on Enter
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') sendMessage();
-  });
-</script>
+    socket.onmessage = (event) => {
+      const msg = document.createElement('div');
+      msg.className = "bg-gray-200 text-gray-800 px-4 py-2 rounded-xl self-start max-w-[75%]";
+      msg.textContent = event.data;
+      messagesDiv.appendChild(msg);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    };
+
+    function sendMessage() {
+      const text = input.value.trim();
+      if (!text) return;
+
+      const myMsg = document.createElement('div');
+      myMsg.className = "bg-blue-100 text-blue-800 px-4 py-2 rounded-xl self-end max-w-[75%]";
+      myMsg.textContent = text;
+      messagesDiv.appendChild(myMsg);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+      socket.send(text);
+      input.value = "";
+    }
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+  </script>
+</body>
+</html>
