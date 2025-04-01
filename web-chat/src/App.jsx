@@ -3,6 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import * as libsignal from "@signalapp/libsignal-protocol";
 import { IndexedDBSignalStore as SignalStore } from "./services/indexedSignalStore";
+// main.jsx
+import ChatApp from "./ChatApp";
+...
+<ChatApp />
 
 export default function ChatApp() {
   const [messages, setMessages] = useState([]);
