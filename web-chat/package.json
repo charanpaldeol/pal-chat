@@ -9,8 +9,7 @@
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-   "libsignal-protocol-javascript": "^2.4.1"
-
+    "libsignal-protocol-javascript": "https://github.com/signalapp/libsignal-protocol-javascript"
   },
   "devDependencies": {
     "vite": "^5.0.0",
