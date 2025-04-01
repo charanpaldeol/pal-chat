@@ -9,7 +9,8 @@
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "libsignal-protocol-javascript": "^2.4.1"
+    "@privacyresearch/libsignal-protocol-javascript": "^2.4.1"
+
 
   },
   "devDependencies": {
