@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import * as libsignal from "@signalapp/libsignal-protocol";
+import { IndexedDBSignalStore as SignalStore } from "./services/indexedSignalStore";
 
 export default function ChatApp() {
   const [messages, setMessages] = useState([]);
@@ -15,7 +16,6 @@ export default function ChatApp() {
   const userIdRef = useRef("user-" + Date.now());
   const [signalIdentity, setSignalIdentity] = useState(null);
 
-  // === ENCRYPTION TOGGLE ===
   const handleToggleEncryption = async () => {
     if (!isEncrypted) {
       await generateSignalKeys();
@@ -26,8 +26,16 @@ export default function ChatApp() {
     setIsEncrypted((prev) => !prev);
   };
 
-  // === SIGNAL KEY GENERATION ===
   const generateSignalKeys = async () => {
+    const storedIdKey = await SignalStore.get("identityKey");
+    const storedRegId = await SignalStore.get("registrationId");
+
+    if (storedIdKey && storedRegId) {
+      console.log("✅ Loaded identity from IndexedDB");
+      setSignalIdentity({ identityKeyPair: storedIdKey, registrationId: storedRegId });
+      return;
+    }
+
     const identityKeyPair = await libsignal.KeyHelper.generateIdentityKeyPair();
     const registrationId = await libsignal.KeyHelper.generateRegistrationId();
     const signedPreKey = await libsignal.KeyHelper.generateSignedPreKey(identityKeyPair, 1);
@@ -37,9 +45,13 @@ export default function ChatApp() {
       const preKey = await libsignal.KeyHelper.generatePreKey(i + 2);
       oneTimePreKeys.push({
         keyId: preKey.keyId,
-        publicKey: arrayBufferToBase64(preKey.keyPair.pubKey)
+        publicKey: arrayBufferToBase64(preKey.keyPair.pubKey),
       });
     }
+
+    await SignalStore.put("identityKey", identityKeyPair);
+    await SignalStore.put("registrationId", registrationId);
+    setSignalIdentity({ identityKeyPair, registrationId });
 
     const keysPayload = {
       username: userIdRef.current,
@@ -52,12 +64,10 @@ export default function ChatApp() {
         keyPair: {
           pubKey: arrayBufferToBase64(await signedPreKey.keyPair.pubKey.export()),
           privKey: arrayBufferToBase64(await signedPreKey.keyPair.privKey.export()),
-        }
+        },
       },
-      oneTimePreKeys
+      oneTimePreKeys,
     };
-
-    setSignalIdentity(keysPayload); // store locally
 
     const res = await fetch("https://api.palchat.org/api/auth/register-keys", {
       method: "POST",
@@ -67,9 +77,34 @@ export default function ChatApp() {
 
     if (res.ok) console.log("✅ Signal keys registered");
     else console.warn("⚠️ Signal registration failed");
+
+    // MOCK: Fetch recipient keys — replace this with real recipient API
+    const recipientKeys = keysPayload;
+    await buildSession(recipientKeys, identityKeyPair, registrationId);
   };
 
-  // === WEBSOCKET SETUP ===
+  const buildSession = async (remoteKeys, identityKeyPair, registrationId) => {
+    const address = new libsignal.SignalProtocolAddress(remoteKeys.username, 1);
+    const sessionBuilder = new libsignal.SessionBuilder(SignalStore, address);
+
+    const preKeyBundle = {
+      identityKey: base64ToArrayBuffer(remoteKeys.identityKey.pubKey),
+      registrationId,
+      preKey: {
+        keyId: remoteKeys.oneTimePreKeys[0].keyId,
+        publicKey: base64ToArrayBuffer(remoteKeys.oneTimePreKeys[0].publicKey),
+      },
+      signedPreKey: {
+        keyId: remoteKeys.signedPreKey.keyId,
+        publicKey: base64ToArrayBuffer(remoteKeys.signedPreKey.keyPair.pubKey),
+        signature: new Uint8Array(64), // placeholder
+      },
+    };
+
+    await sessionBuilder.processPreKey(preKeyBundle);
+    console.log("🔐 Signal session established");
+  };
+
   useEffect(() => {
     const socket = new WebSocket("wss://pal-chat.fly.dev");
     socketRef.current = socket;
@@ -91,17 +126,26 @@ export default function ChatApp() {
     };
 
     socket.onmessage = async (event) => {
-      let messageText = event.data instanceof Blob ? await event.data.text() : event.data;
+      let rawMessage = event.data instanceof Blob ? await event.data.text() : event.data;
+      let decrypted = rawMessage;
 
-      // TODO: decrypt the message using Signal session
-      const decrypted = isEncrypted ? "[encrypted] " + messageText : messageText;
+      if (isEncrypted) {
+        try {
+          const address = new libsignal.SignalProtocolAddress(userIdRef.current, 1);
+          const sessionCipher = new libsignal.SessionCipher(SignalStore, address);
+          const decoded = new Uint8Array([...atob(rawMessage)].map((c) => c.charCodeAt(0)));
+
+          const decryptedBytes = await sessionCipher.decryptPreKeyWhisperMessage(decoded, "binary");
+          decrypted = new TextDecoder().decode(decryptedBytes);
+        } catch (err) {
+          console.warn("⚠️ Failed to decrypt message:", err);
+        }
+      }
 
       setMessages((prev) => [...prev, { from: "Stranger", text: decrypted }]);
     };
 
-    return () => {
-      socket.close();
-    };
+    return () => socket.close();
   }, [isEncrypted]);
 
   useEffect(() => {
@@ -111,10 +155,17 @@ export default function ChatApp() {
   const sendMessage = async () => {
     if (!input.trim() || !connected) return;
 
-    // TODO: use Signal to encrypt message before sending
-    const encryptedMessage = input;
+    let messageToSend = input;
 
-    socketRef.current.send(encryptedMessage);
+    if (isEncrypted) {
+      const address = new libsignal.SignalProtocolAddress(userIdRef.current, 1);
+      const sessionCipher = new libsignal.SessionCipher(SignalStore, address);
+
+      const ciphertext = await sessionCipher.encrypt(new TextEncoder().encode(input));
+      messageToSend = btoa(String.fromCharCode(...ciphertext.body));
+    }
+
+    socketRef.current.send(messageToSend);
     setMessages((prev) => [...prev, { from: "You", text: input }]);
     setInput("");
   };
@@ -123,9 +174,18 @@ export default function ChatApp() {
     if (e.key === "Enter") sendMessage();
   };
 
-  // === UTIL ===
   const arrayBufferToBase64 = (buffer) => {
     return btoa(String.fromCharCode(...new Uint8Array(buffer)));
+  };
+
+  const base64ToArrayBuffer = (b64) => {
+    const binary = atob(b64);
+    const len = binary.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    return bytes.buffer;
   };
 
   return (
@@ -137,7 +197,7 @@ export default function ChatApp() {
             onClick={handleToggleEncryption}
             className="bg-gray-700 text-white px-4 py-1 rounded hover:bg-gray-600 text-sm"
           >
-            {isEncrypted ? '🔒 Encrypted' : '🔓 Plain Text'}
+            {isEncrypted ? "🔒 Encrypted" : "🔓 Plain Text"}
           </button>
         </div>
 
@@ -145,9 +205,7 @@ export default function ChatApp() {
           {connected ? "🟢 Connected to server" : "🔴 Disconnected"}
         </p>
 
-        {error && (
-          <p className="text-sm text-red-600 text-center mb-2">{error}</p>
-        )}
+        {error && <p className="text-sm text-red-600 text-center mb-2">{error}</p>}
 
         <div className="flex-1 overflow-y-auto space-y-2 p-2 border rounded-md mb-4">
           {messages.map((msg, index) => (
