@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import * as libsignal from "libsignal-protocol-javascript";
+import * as libsignal from 'libsignal';
+
 import { IndexedDBSignalStore as SignalStore } from "./services/indexedSignalStore";
 import * as libsignal from '@privacyresearch/libsignal-protocol-javascript';
 
