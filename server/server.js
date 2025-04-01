@@ -1,29 +1,28 @@
+// server/server.js
 
-const WebSocket = require('ws');
+const express = require('express');
+const dotenv = require('dotenv');
+const cors = require('cors');
+const authRoutes = require('./routes/authRoutes');
+const messageRoutes = require('./routes/messageRoutes');
 
-const port = process.env.PORT || 3000;
-const wss = new WebSocket.Server({ port });
+dotenv.config();
 
-const clients = new Set();
+const app = express();
+const PORT = process.env.PORT || 4000;
 
-wss.on('connection', (ws) => {
-  clients.add(ws);
-  console.log('🔌 New client connected');
+// Middleware
+app.use(cors());
+app.use(express.json());
 
-  ws.on('message', (message) => {
-    console.log('📩 Message received:', message);
-
-    for (const client of clients) {
-      if (client !== ws && client.readyState === WebSocket.OPEN) {
-        client.send(message);
-      }
-    }
-  });
-
-  ws.on('close', () => {
-    clients.delete(ws);
-    console.log('❌ Client disconnected');
-  });
+// Routes
+app.get('/', (req, res) => {
+  res.send('Pal Chat Backend is Running ✅');
 });
+app.use('/api/auth', authRoutes);
+app.use('/api/messages', messageRoutes);
 
-console.log(`🚀 WebSocket relay running on port ${port}`);
+// Start Server
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
