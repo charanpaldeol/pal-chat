@@ -1,7 +1,7 @@
 // web-chat/src/services/app.js
 
 import { useEffect, useRef, useState } from "react";
-import * as libsignal from "@signalapp/libsignal-protocol";
+import * as libsignal from "libsignal-protocol-javascript";
 import { IndexedDBSignalStore as SignalStore } from "./services/indexedSignalStore";
 // main.jsx
 import ChatApp from "./ChatApp";
