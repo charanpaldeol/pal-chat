@@ -1,3 +1,5 @@
+// web-chat/src/services/app.js
+
 import { useEffect, useRef, useState } from "react";
 import * as libsignal from "@signalapp/libsignal-protocol";
 
@@ -6,56 +8,66 @@ export default function ChatApp() {
   const [input, setInput] = useState("");
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState(null);
+  const [isEncrypted, setIsEncrypted] = useState(false);
+
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
-
-  // === SIGNAL IDENTITY SETUP ===
-  const [signalIdentity, setSignalIdentity] = useState(null);
   const userIdRef = useRef("user-" + Date.now());
+  const [signalIdentity, setSignalIdentity] = useState(null);
 
-  useEffect(() => {
-    const generateSignalKeys = async () => {
-      const identityKeyPair = await libsignal.KeyHelper.generateIdentityKeyPair();
-      const registrationId = await libsignal.KeyHelper.generateRegistrationId();
+  // === ENCRYPTION TOGGLE ===
+  const handleToggleEncryption = async () => {
+    if (!isEncrypted) {
+      await generateSignalKeys();
+      console.log("🔐 Encryption enabled");
+    } else {
+      console.log("🔓 Encryption disabled");
+    }
+    setIsEncrypted((prev) => !prev);
+  };
 
-      const signedPreKey = await libsignal.KeyHelper.generateSignedPreKey(identityKeyPair, 1);
-      const oneTimePreKeys = [];
-      for (let i = 0; i < 5; i++) {
-        const preKey = await libsignal.KeyHelper.generatePreKey(i + 2);
-        oneTimePreKeys.push({
-          keyId: preKey.keyId,
-          publicKey: arrayBufferToBase64(preKey.keyPair.pubKey)
-        });
-      }
+  // === SIGNAL KEY GENERATION ===
+  const generateSignalKeys = async () => {
+    const identityKeyPair = await libsignal.KeyHelper.generateIdentityKeyPair();
+    const registrationId = await libsignal.KeyHelper.generateRegistrationId();
+    const signedPreKey = await libsignal.KeyHelper.generateSignedPreKey(identityKeyPair, 1);
+    const oneTimePreKeys = [];
 
-      const keysPayload = {
-        username: userIdRef.current,
-        identityKey: {
-          pubKey: arrayBufferToBase64(await identityKeyPair.pubKey.export()),
-          privKey: arrayBufferToBase64(await identityKeyPair.privKey.export()),
-        },
-        signedPreKey: {
-          keyId: signedPreKey.keyId,
-          keyPair: {
-            pubKey: arrayBufferToBase64(await signedPreKey.keyPair.pubKey.export()),
-            privKey: arrayBufferToBase64(await signedPreKey.keyPair.privKey.export()),
-          }
-        },
-        oneTimePreKeys
-      };
-
-      setSignalIdentity(keysPayload); // store locally
-      const res = await fetch("https://api.palchat.org/api/auth/register-keys", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(keysPayload),
+    for (let i = 0; i < 5; i++) {
+      const preKey = await libsignal.KeyHelper.generatePreKey(i + 2);
+      oneTimePreKeys.push({
+        keyId: preKey.keyId,
+        publicKey: arrayBufferToBase64(preKey.keyPair.pubKey)
       });
-      if (res.ok) console.log("🔐 Signal keys registered");
-      else console.warn("⚠️ Signal registration failed");
+    }
+
+    const keysPayload = {
+      username: userIdRef.current,
+      identityKey: {
+        pubKey: arrayBufferToBase64(await identityKeyPair.pubKey.export()),
+        privKey: arrayBufferToBase64(await identityKeyPair.privKey.export()),
+      },
+      signedPreKey: {
+        keyId: signedPreKey.keyId,
+        keyPair: {
+          pubKey: arrayBufferToBase64(await signedPreKey.keyPair.pubKey.export()),
+          privKey: arrayBufferToBase64(await signedPreKey.keyPair.privKey.export()),
+        }
+      },
+      oneTimePreKeys
     };
 
-    generateSignalKeys();
-  }, []);
+    setSignalIdentity(keysPayload); // store locally
+
+    const res = await fetch("https://api.palchat.org/api/auth/register-keys", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(keysPayload),
+    });
+
+    if (res.ok) console.log("✅ Signal keys registered");
+    else console.warn("⚠️ Signal registration failed");
+  };
 
   // === WEBSOCKET SETUP ===
   useEffect(() => {
@@ -82,7 +94,7 @@ export default function ChatApp() {
       let messageText = event.data instanceof Blob ? await event.data.text() : event.data;
 
       // TODO: decrypt the message using Signal session
-      const decrypted = "[encrypted] " + messageText;
+      const decrypted = isEncrypted ? "[encrypted] " + messageText : messageText;
 
       setMessages((prev) => [...prev, { from: "Stranger", text: decrypted }]);
     };
@@ -90,7 +102,7 @@ export default function ChatApp() {
     return () => {
       socket.close();
     };
-  }, []);
+  }, [isEncrypted]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -119,7 +131,15 @@ export default function ChatApp() {
   return (
     <div className="bg-gray-100 text-gray-900 flex items-center justify-center min-h-screen">
       <div className="w-full max-w-md p-4 bg-white rounded-2xl shadow-lg flex flex-col h-[90vh]">
-        <h1 className="text-xl font-bold text-center mb-2">Pal (ਪਲ) – Private Chat</h1>
+        <div className="flex justify-between items-center mb-2">
+          <h1 className="text-xl font-bold">Pal (ਪਲ) – Private Chat</h1>
+          <button
+            onClick={handleToggleEncryption}
+            className="bg-gray-700 text-white px-4 py-1 rounded hover:bg-gray-600 text-sm"
+          >
+            {isEncrypted ? '🔒 Encrypted' : '🔓 Plain Text'}
+          </button>
+        </div>
 
         <p className={`text-sm text-center mb-2 ${connected ? "text-green-600" : "text-red-500"}`}>
           {connected ? "🟢 Connected to server" : "🔴 Disconnected"}
