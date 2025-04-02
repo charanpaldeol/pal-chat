@@ -1,5 +1,19 @@
 import { useEffect } from 'react';
 import Navbar from '../components/Landing/Navbar';
+import {
+  withSubtleHover,
+  withMomentaryRotate,
+  withDynamicThemeColor
+} from '../components/Landing/animations'; // Adjust path if needed
+
+// Enhanced Components
+const AnimatedCTA = withSubtleHover(
+  withMomentaryRotate(
+    withDynamicThemeColor("a")
+  )
+);
+
+const HoverCard = withSubtleHover("div");
 
 export default function LandingPage() {
   useEffect(() => {
@@ -18,11 +32,12 @@ export default function LandingPage() {
         <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
           Pal Chat is a privacy-first chat app with no data storage. Just instant, anonymous, encrypted conversations.
         </p>
-        <a
+        <AnimatedCTA
           href="/chat"
-          className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-full text-lg font-medium transition"
+          className="inline-block bg-blue-600 text-white px-8 py-3 rounded-full text-lg font-medium transition cursor-pointer"
         >
-          Get Started</a>
+          Get Started
+        </AnimatedCTA>
       </section>
 
       {/* Illustration */}
@@ -53,13 +68,13 @@ export default function LandingPage() {
                 desc: 'Messages are encrypted using modern cryptography for total privacy.',
               },
             ].map((feature, idx) => (
-              <div
+              <HoverCard
                 key={idx}
-                className="bg-gray-100 p-8 rounded-xl shadow hover:shadow-md transition text-left"
+                className="bg-gray-100 p-8 rounded-xl shadow transition text-left"
               >
                 <h3 className="text-2xl font-semibold mb-2">{feature.title}</h3>
                 <p className="text-gray-600">{feature.desc}</p>
-              </div>
+              </HoverCard>
             ))}
           </div>
         </div>
