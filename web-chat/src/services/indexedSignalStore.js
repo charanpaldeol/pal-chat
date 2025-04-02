@@ -1,3 +1,5 @@
+/*
+
 // web-chat/src/services/indexedSignalStore.js
 import { openDB } from 'idb';
 
@@ -27,3 +29,5 @@ export const IndexedDBSignalStore = {
     return db.delete(STORE_NAME, key);
   },
 };
+
+*/
