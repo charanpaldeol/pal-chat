@@ -1,3 +1,4 @@
+/*
 export default function ChatApp() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -241,3 +242,5 @@ export default function ChatApp() {
     </div>
   );
 }
+
+*/
