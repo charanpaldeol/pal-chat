@@ -1,12 +1,15 @@
 export default function Navbar() {
   return (
-    <nav className="flex justify-between items-center py-6 px-8 bg-white shadow-md">
-      <div className="text-xl font-semibold">Pal (ਪਲ)</div>
-      <ul className="flex gap-8">
-        <li><a href="#features" className="hover:text-blue-500">Features</a></li>
-        <li><a href="/chat" className="hover:text-blue-500">Chat</a></li>
-      </ul>
+    <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50 px-6 py-4 flex justify-between items-center">
+      <div className="text-xl font-bold">Pal (ਪਲ)</div>
+      <div className="space-x-6 hidden sm:block">
+        <a href="#features" className="text-gray-600 hover:text-blue-600">
+          Features
+        </a>
+        <a href="/chat" className="text-gray-600 hover:text-blue-600">
+          Chat
+        </a>
+      </div>
     </nav>
   );
 }
-
