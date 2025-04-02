@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import Navbar from '../components/Navbar';
+import Navbar from '../components/Landing/Navbar';
 
 export default function LandingPage() {
   useEffect(() => {
