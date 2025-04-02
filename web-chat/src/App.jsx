@@ -1,5 +1,5 @@
 import LandingPage from './pages/LandingPage';
-import Navbar from './components/Navbar';
+import Navbar from './components/landing/Navbar';
 
 export default function App() {
   return (
