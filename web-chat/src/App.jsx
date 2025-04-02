@@ -1,15 +1,22 @@
-// import ChatApp from "./ChatApp";
-// import { IndexedDBSignalStore as SignalStore } from "./services/indexedSignalStore";
-// import * as libsignal from '@privacyresearch/libsignal-protocol-javascript';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import LandingPage from './pages/LandingPage';
+import ChatPage from './pages/ChatPage';
 
-export default function App() {
+function App() {
   return (
-    <div>
-      <h1>Welcome to Pal Chat</h1>
-      <p>Landing page coming soon...</p>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/chat" element={<ChatPage />} />
+      </Routes>
+    </Router>
   );
 }
+
+export default App;
+
+
+
 
 /*
 
