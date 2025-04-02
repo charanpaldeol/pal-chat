@@ -1,27 +1,11 @@
 import LandingPage from './pages/LandingPage';
+import Navbar from './components/Navbar';
 
 export default function App() {
   return (
-    <div>
+    <div className="bg-gray-50">
+      <Navbar />
       <LandingPage />
     </div>
   );
 }
-
-
-/*
-
-
-import { useEffect, useRef, useState } from "react";
-// import * as libsignal from 'libsignal';
-
-import { IndexedDBSignalStore as SignalStore } from "./services/indexedSignalStore";
-// import * as libsignal from '@privacyresearch/libsignal-protocol-javascript';
-
-// import ChatApp from "./ChatApp";
-
-export default function App() {
-  return <ChatApp />;
-}
-*/
-
