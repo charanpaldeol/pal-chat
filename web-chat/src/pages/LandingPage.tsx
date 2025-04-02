@@ -1,89 +1,47 @@
-import { useEffect } from 'react';
-import Navbar from '../components/Landing/Navbar';
-import {
-  withSubtleHover,
-  withMomentaryRotate,
-  withDynamicThemeColor
-} from '../components/Landing/animations'; // Adjust path if needed
+import { forwardRef, type ComponentType } from "react"
+import { createStore } from "https://framer.com/m/framer/store.js@^1.0.0"
+import { randomColor } from "https://framer.com/m/framer/utils.js@^0.9.0"
 
-// Enhanced Components
-const AnimatedCTA = withSubtleHover(
-  withMomentaryRotate(
-    withDynamicThemeColor("a")
-  )
-);
+// Learn more: https://www.framer.com/developers/overrides/
 
-const HoverCard = withSubtleHover("div");
+const useStore = createStore({
+    background: "#0099FF",
+})
 
-export default function LandingPage() {
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+export function withRotate(Component): ComponentType {
+    return forwardRef((props, ref) => {
+        return (
+            <Component
+                ref={ref}
+                {...props}
+                animate={{ rotate: 90 }}
+                transition={{ duration: 2 }}
+            />
+        )
+    })
+}
 
-  return (
-    <div className="bg-gray-50 text-gray-800 min-h-screen font-sans">
-      <Navbar />
+export function withHover(Component): ComponentType {
+    return forwardRef((props, ref) => {
+        return <Component ref={ref} {...props} whileHover={{ scale: 1.05 }} />
+    })
+}
 
-      {/* Hero Section */}
-      <section className="pt-32 pb-20 px-6 text-center max-w-5xl mx-auto">
-        <h1 className="text-5xl md:text-6xl font-extrabold mb-6 leading-tight">
-          Talk in the moment. <br /> No trails, no history.
-        </h1>
-        <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-          Pal Chat is a privacy-first chat app with no data storage. Just instant, anonymous, encrypted conversations.
-        </p>
-        <AnimatedCTA
-          href="/chat"
-          className="inline-block bg-blue-600 text-white px-8 py-3 rounded-full text-lg font-medium transition cursor-pointer"
-        >
-          Get Started
-        </AnimatedCTA>
-      </section>
+export function withRandomColor(Component): ComponentType {
+    return forwardRef((props, ref) => {
+        const [store, setStore] = useStore()
 
-      {/* Illustration */}
-      <section className="px-6 mb-20 flex justify-center">
-        <img
-          src="https://images.unsplash.com/photo-1525186402429-97b738e9e656?auto=format&fit=crop&w=1000&q=80"
-          alt="Chat Illustration"
-          className="rounded-2xl shadow-lg w-full max-w-3xl"
-        />
-      </section>
-
-      {/* Features */}
-      <section id="features" className="bg-white py-20 px-6">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-12">Why Choose Pal Chat?</h2>
-          <div className="grid md:grid-cols-3 gap-10">
-            {[
-              {
-                title: 'Zero Data Storage',
-                desc: 'No logs, no backups. Chats vanish forever when you close the window.',
-              },
-              {
-                title: 'Fully Anonymous',
-                desc: 'No phone numbers, emails or usernames. Just moments shared in time.',
-              },
-              {
-                title: 'End-to-End Encryption',
-                desc: 'Messages are encrypted using modern cryptography for total privacy.',
-              },
-            ].map((feature, idx) => (
-              <HoverCard
-                key={idx}
-                className="bg-gray-100 p-8 rounded-xl shadow transition text-left"
-              >
-                <h3 className="text-2xl font-semibold mb-2">{feature.title}</h3>
-                <p className="text-gray-600">{feature.desc}</p>
-              </HoverCard>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="py-10 text-center text-sm text-gray-500 bg-gray-50">
-        <p>© {new Date().getFullYear()} Pal Chat. Built with ❤️ for privacy.</p>
-      </footer>
-    </div>
-  );
+        return (
+            <Component
+                ref={ref}
+                {...props}
+                animate={{
+                    background: store.background,
+                }}
+                onClick={() => {
+                    setStore({ background: randomColor() })
+                }}
+            />
+        )
+    })
 }
