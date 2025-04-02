@@ -1,9 +1,7 @@
-
 export default function LandingPage() {
   return (
-    <div>
-      <h1>Welcome to Pal Chat!</h1>
-      <p>Landing page coming soon.</p>
+    <div className="min-h-screen flex items-center justify-center">
+      <h1 className="text-4xl font-bold">🎉 Pal Chat Landing Page 🎉</h1>
     </div>
   );
 }
