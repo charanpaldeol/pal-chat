@@ -1,9 +1,9 @@
 // file: Navbar.tsx
 "use client";
 
-import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
-import { Menu } from "lucide-react";
-import Link from "next/link";
+//import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
+//import { Menu } from "lucide-react";
+//import Link from "next/link";
 
 export default function Navbar() {
   return (
