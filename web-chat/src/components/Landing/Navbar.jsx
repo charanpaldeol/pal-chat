@@ -37,7 +37,8 @@ export default function Navbar() {
   );
 }
 
-function NavLinks({ mobile = false }: { mobile?: boolean }) {
+function NavLinks(props) {
+  const mobile = props.mobile || false;
   const linkClasses = `block text-gray-600 hover:text-blue-600 transition ${
     mobile ? "text-lg" : ""
   }`;
@@ -49,3 +50,4 @@ function NavLinks({ mobile = false }: { mobile?: boolean }) {
     </>
   );
 }
+
