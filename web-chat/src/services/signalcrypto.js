@@ -1,4 +1,4 @@
-// web-chat/src/services/signalCrypto.js
+// web-chat/src/services/signalcrypto.js
 
 import * as libsignal from 'libsignal';
 
