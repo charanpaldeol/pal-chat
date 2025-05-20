@@ -5,7 +5,6 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const path = require('path');
 const authRoutes = require('./routes/authRoutes');
-const messageRoutes = require('./routes/messageRoutes');
 
 dotenv.config();
 
@@ -22,7 +21,6 @@ app.get('/', (req, res) => {
   res.sendFile(path.resolve(__dirname, '..', 'index.html'));
 });
 app.use('/api/auth', authRoutes);
-app.use('/api/messages', messageRoutes);
 
 // Start Server
 app.listen(PORT, () => {
