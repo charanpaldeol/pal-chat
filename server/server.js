@@ -3,6 +3,7 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
+const path = require('path');
 const authRoutes = require('./routes/authRoutes');
 const messageRoutes = require('./routes/messageRoutes');
 
@@ -14,10 +15,11 @@ const PORT = process.env.PORT || 4000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.static(path.resolve(__dirname, '..')));
 
 // Routes
 app.get('/', (req, res) => {
-  res.send('Pal Chat Backend is Running ✅');
+  res.sendFile(path.resolve(__dirname, '..', 'index.html'));
 });
 app.use('/api/auth', authRoutes);
 app.use('/api/messages', messageRoutes);
