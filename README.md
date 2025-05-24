@@ -1,41 +1,20 @@
 # Pal Chat
 
-Pal Chat is a demo application that showcases a basic messaging setup with WebSockets and an API server. The project consists of two small Node.js servers and a React web client.
+This repository currently contains only a simple static page located in
+`index.html`. The original application referenced Node.js servers and a
+React-based chat interface, but those components are no longer included
+here.
 
-## Prerequisites
+## Local preview
 
-- [Node.js](https://nodejs.org/) and npm installed on your machine.
+To view the placeholder page, simply open `index.html` in your browser.
 
-## Setup
+The previous instructions for running `server.js`, starting the Express
+API, and launching the `web-chat/` client have been removed because those
+directories are not part of this repository.
 
-### 1. WebSocket Relay Server
-This server broadcasts WebSocket messages between connected clients.
+## About
 
-```bash
-# from the project root
-node server.js
-```
-It runs on port `3000` by default.
-
-### 2. API Server
-The Express API lives in the `server/` folder.
-
-```bash
-cd server
-npm install
-npm start
-```
-The API listens on port `4000`.
-
-### 3. Web Chat
-The front‑end lives in `web-chat/` and uses Vite for development.
-
-```bash
-cd web-chat
-npm install
-npm run dev
-```
-Open the printed local URL (usually `http://localhost:5173`) to chat.
-
-## Overview
-Run the relay server and API server, then start the web chat. Messages will be relayed through the WebSocket server while API endpoints handle key registration.
+Pal Chat began as a demonstration of a basic messaging stack. The project
+has since been pared down to this single HTML file. Feel free to build on
+it or repurpose it as you see fit.
